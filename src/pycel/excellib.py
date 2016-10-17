@@ -1,7 +1,6 @@
 '''
 Python equivalents of various excel functions
 '''
-from __future__ import division
 import numpy as np
 from datetime import datetime
 from math import log
@@ -64,7 +63,7 @@ def xlog(a):
 
 def xmax(*args):
     # ignore non numeric cells
-    data = [x for x in flatten(args) if isinstance(x,(int,float,long))]
+    data = [x for x in flatten(args) if isinstance(x,(int,float))]
     
     # however, if no non numeric cells, return zero (is what excel does)
     if len(data) < 1:
@@ -75,7 +74,7 @@ def xmax(*args):
 
 def xmin(*args):
     # ignore non numeric cells
-    data = [x for x in flatten(args) if isinstance(x,(int,float,long))]
+    data = [x for x in flatten(args) if isinstance(x,(int,float))]
     
     # however, if no non numeric cells, return zero (is what excel does)
     if len(data) < 1:
@@ -86,7 +85,7 @@ def xmin(*args):
 
 def xsum(*args):
     # ignore non numeric cells
-    data = [x for x in flatten(args) if isinstance(x,(int,float,long))]
+    data = [x for x in flatten(args) if isinstance(x,(int,float))]
     
     # however, if no non numeric cells, return zero (is what excel does)
     if len(data) < 1:
@@ -115,7 +114,7 @@ def sumif(range, criteria, sum_range = []): # Excel reference: https://support.o
         return sum_range[x] if x < len(sum_range) else 0
 
     if len(sum_range) == 0:
-        return sum(map(lambda x: range[x], indexes))
+        return sum([range[x] for x in indexes])
     else:
         return sum(map(f, indexes))
 
@@ -128,7 +127,7 @@ def average(*args):
 
 def right(text,n):
     #TODO: hack to deal with naca section numbers
-    if isinstance(text, unicode) or isinstance(text,str):
+    if isinstance(text, str):
         return text[-n:]
     else:
         # TODO: get rid of the decimal
@@ -156,7 +155,7 @@ def index(*args):
 def lookup(value, lookup_range, result_range):
     
     # TODO
-    if not isinstance(value,(int,float,long)):
+    if not isinstance(value,(int,float)):
         raise Exception("Non numeric lookups (%s) not supported" % value)
     
     # TODO: note, may return the last equal value
@@ -164,7 +163,7 @@ def lookup(value, lookup_range, result_range):
     # index of the last numeric value
     lastnum = -1
     for i,v in enumerate(lookup_range):
-        if isinstance(v,(int,float,long)):
+        if isinstance(v,(int,float)):
             if v > value:
                 break
             else:
@@ -262,9 +261,9 @@ def match(lookup_value, lookup_array, match_type=1):
 
 
 def mod(nb, q): # Excel Reference: https://support.office.com/en-us/article/MOD-function-9b6cd169-b6ee-406a-a97b-edf2a9dc24f3
-    if not isinstance(nb, (int, long)):
+    if not isinstance(nb, int):
         raise TypeError("%s is not an integer" % str(nb))
-    elif not isinstance(q, (int, long)):
+    elif not isinstance(q, int):
         raise TypeError("%s is not an integer" % str(q))
     else:
         return nb % q
@@ -277,7 +276,7 @@ def count(*args): # Excel reference: https://support.office.com/en-us/article/CO
 
     for arg in l:
         if type(arg) == list:
-            total += len(filter(lambda x: is_number(x) and type(x) is not bool, arg)) # count inside a list
+            total += len([x for x in arg if is_number(x) and type(x) is not bool]) # count inside a list
         elif is_number(arg): # int() is used for text representation of numbers
             total += 1
 
@@ -405,7 +404,7 @@ def yearfrac(start_date, end_date, basis = 0): # Excel reference: https://suppor
         days_in_leap_year = 0
         days_not_in_leap_year = 0
 
-        year_range = range(y1, y2 + 1)
+        year_range = list(range(y1, y2 + 1))
 
         for y in year_range:
 
@@ -441,7 +440,7 @@ def yearfrac(start_date, end_date, basis = 0): # Excel reference: https://suppor
             else:
                 denom = 365
         else:
-            year_range = range(y1, y2 + 1)
+            year_range = list(range(y1, y2 + 1))
             nb = 0
 
             for y in year_range:
