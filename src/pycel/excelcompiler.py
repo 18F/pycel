@@ -6,26 +6,26 @@ try:
     import pythoncom
     from pycel.excelwrapper import ExcelComWrapper as ExcelWrapperImpl
 except:
-    print "Can\'t import win32com -> switch from Com to Openpyxl wrapping implementation"
+    print("Can\'t import win32com -> switch from Com to Openpyxl wrapping implementation")
     from pycel.excelwrapper import ExcelOpxWrapper as ExcelWrapperImpl
 
-import excellib
-from excellib import *
-from excelutil import *
+from . import excellib
+from .excellib import *
+from .excelutil import *
 from math import *
 from networkx.classes.digraph import DiGraph
 from networkx.drawing.nx_pydot import write_dot
 from networkx.drawing.nx_pylab import draw, draw_circular
 from networkx.readwrite.gexf import write_gexf
-from tokenizer import ExcelParser, f_token, shunting_yard
-import cPickle
+from .tokenizer import ExcelParser, f_token, shunting_yard
+import Pickle
 import logging
 import networkx as nx
 
 
-__version__ = filter(str.isdigit, "$Revision: 2524 $")
-__date__ = filter(str.isdigit, "$Date: 2011-09-06 17:05:00 +0100 (Tue, 06 Sep 2011) $")
-__author__ = filter(str.isdigit, "$Author: dg2d09 $")
+__version__ = list(filter(str.isdigit, "$Revision: 2524 $"))
+__date__ = list(filter(str.isdigit, "$Date: 2011-09-06 17:05:00 +0100 (Tue, 06 Sep 2011) $"))
+__author__ = list(filter(str.isdigit, "$Author: dg2d09 $"))
 
 
 class Spreadsheet(object):
@@ -78,16 +78,16 @@ class Spreadsheet(object):
         if cell.value is None: return
         #print "resetting", cell.address()
         cell.value = None
-        map(self.reset,self.G.successors_iter(cell)) 
+        list(map(self.reset,self.G.successors_iter(cell)) )
 
     def print_value_tree(self,addr,indent):
         cell = self.cellmap[addr]
-        print "%s %s = %s" % (" "*indent,addr,cell.value)
+        print(" "*indent, addr, "=", cell.value)
         for c in self.G.predecessors_iter(cell):
             self.print_value_tree(c.address(), indent+1)
 
     def recalculate(self):
-        for c in self.cellmap.values():
+        for c in list(self.cellmap.values()):
             if isinstance(c,CellRange):
                 self.evaluate_range(c,is_addr=False)
             else:
@@ -132,11 +132,11 @@ class Spreadsheet(object):
             return self.evaluate_range(rng)
                 
         try:
-            print "Evalling: %s, %s" % (cell.address(),cell.python_expression)
+            print("Evalling:", cell.address(), cell.python_expression)
             vv = eval(cell.compiled_expression)
             #print "Cell %s evalled to %s" % (cell.address(),vv)
             if vv is None:
-                print "WARNING %s is None" % (cell.address())
+                print("WARNING", "is None", cell.address())
             cell.value = vv
         except Exception as e:
             if e.message.startswith("Problem evalling"):
@@ -581,7 +581,7 @@ class ExcelCompiler(object):
             code = root.emit(ast,context=Context(cell,self.excel))
         else:
             ast = None
-            code = str('"' + cell.value + '"' if isinstance(cell.value,unicode) else cell.value)
+            code = str('"' + cell.value + '"' if isinstance(cell.value,str) else cell.value)
             
         return code,ast
 
@@ -606,17 +606,17 @@ class ExcelCompiler(object):
         seeds, nr, nc = Cell.make_cells(self.excel, seed, sheet=cursheet) # no need to output nr and nc here, since seed can be a list of unlinked cells
         seeds = list(flatten(seeds))
         
-        print "Seed %s expanded into %s cells" % (seed,len(seeds))
+        print("Seed", seed, "expanded into", len(seeds), "cells")
         
         # only keep seeds with formulas or numbers
         seeds = [s for s in seeds if s.formula or isinstance(s.value,(int,float))]
 
-        print "%s filtered seeds " % len(seeds)
+        print(len(seeds), "filtered seeds")
         
         # cells to analyze: only formulas
         todo = [s for s in seeds if s.formula]
 
-        print "%s cells on the todo list" % len(todo)
+        print(len(todo), "cells on the todo list")
 
         # map of all cells
         cellmap = dict([(x.address(),x) for x in seeds])
@@ -625,12 +625,12 @@ class ExcelCompiler(object):
         G = nx.DiGraph()
 
         # match the info in cellmap
-        for c in cellmap.itervalues(): self.add_node_to_graph(G, c)
+        for c in cellmap.values(): self.add_node_to_graph(G, c)
 
         while todo:
             c1 = todo.pop()
             
-            print "Handling ", c1.address()
+            print("Handling ", c1.address())
             
             # set the current sheet so relative addresses resolve properly
             if c1.sheet != cursheet:
@@ -707,8 +707,7 @@ class ExcelCompiler(object):
                     # add an edge from the cell to the parent (range or cell)
                     G.add_edge(cellmap[c2.address()],target)
             
-        print "Graph construction done, %s nodes, %s edges, %s cellmap entries" % (len(G.nodes()),len(G.edges()),len(cellmap))
-
+        print("Graph construction done", len(G.nodes()), "nodes, ", len(G.edges()), "edges, ", len(cellmap), "cellmap entries")
         sp = Spreadsheet(G,cellmap)
         
         return sp
@@ -763,13 +762,13 @@ if __name__ == '__main__':
               ]
 
     for i in inputs:
-        print "**************************************************"
-        print "Formula: ", i
+        print("**************************************************")
+        print("Formula: ", i)
 
         e = shunting_yard(i);
-        print "RPN: ",  "|".join([str(x) for x in e])
+        print("RPN: ",  "|".join([str(x) for x in e]))
         
         G,root = build_ast(e)
         
-        print "Python code: ", root.emit(G,context=None)
-        print "**************************************************"
+        print("Python code: ", root.emit(G,context=None))
+        print("**************************************************")
