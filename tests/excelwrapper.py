@@ -4,7 +4,7 @@ try:
     import pythoncom
     from pycel.excelwrapper import ExcelComWrapper as ExcelWrapperImpl
 except:
-    print "Can\'t import win32com -> switch from Com to Openpyxl wrapping implementation"
+    print("Can\'t import win32com -> switch from Com to Openpyxl wrapping implementation")
     from pycel.excelwrapper import ExcelOpxWrapper as ExcelWrapperImpl
 
 import os
@@ -22,7 +22,7 @@ def connect():
     try:
         excel.connect()
     except Exception as inst:
-        print inst
+        print(inst)
         connected = False
     assert connected == True
 
@@ -53,7 +53,7 @@ def get_used_range():
 def get_value():
     excel.connect()
     excel.set_sheet("Sheet1")
-    assert excel.get_value(2,2) == 9L
+    assert excel.get_value(2,2) == 9
 
 def get_formula():
     excel.connect()
@@ -78,9 +78,9 @@ def get_formula_or_value():
     excel.connect()
     excel.set_sheet("Sheet1")
     list = excel.get_formula_or_value("Sheet1!A2:C2")
-    assert list == ((u'2', u'=SUM(A2:A4)', u'=SIN(B2*A2^2)'),)
+    assert list == (('2', '=SUM(A2:A4)', '=SIN(B2*A2^2)'),)
     list = excel.get_formula_or_value("Sheet1!A1:A3")
-    assert list == ((u'1',), (u'2',), (u'3',))
+    assert list == (('1',), ('2',), ('3',))
 
 def get_row():
     excel.connect()
