@@ -18,7 +18,7 @@ from networkx.drawing.nx_pydot import write_dot
 from networkx.drawing.nx_pylab import draw, draw_circular
 from networkx.readwrite.gexf import write_gexf
 from .tokenizer import ExcelParser, f_token, shunting_yard
-import Pickle
+import pickle
 import logging
 import networkx as nx
 
@@ -38,13 +38,13 @@ class Spreadsheet(object):
     @staticmethod
     def load_from_file(fname):
         f = open(fname,'rb')
-        obj = cPickle.load(f)
+        obj = pickle.load(f)
         #obj = load(f)
         return obj
     
     def save_to_file(self,fname):
         f = open(fname,'wb')
-        cPickle.dump(self, f, protocol=2)
+        pickle.dump(self, f, protocol=2)
         f.close()
 
     def export_to_dot(self,fname):
